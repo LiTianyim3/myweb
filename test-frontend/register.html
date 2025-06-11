@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户注册</title>
+    <link rel="stylesheet" href="static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <h1>用户注册</h1>
+            <div id="error-message" class="error-message"></div>
+            <form id="register-form">
+                <div class="form-group">
+                    <label for="username">用户名</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">邮箱</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">密码</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirm-password">确认密码</label>
+                    <input type="password" id="confirm-password" name="confirm-password" required>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">注册</button>
+                </div>
+                <div class="form-group text-center">
+                    <p>已有账号? <a href="index.html">返回登录</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+    document.getElementById('register-form').addEventListener('submit', function(e) {
+        e.preventDefault();  // 阻止表单默认提交
+
+        const username = document.getElementById('username').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirm-password').value;
+        const errorMessage = document.getElementById('error-message');
+
+        // 重置错误提示
+        errorMessage.textContent = '';
+
+        // 校验必填
+        if (!username || !email || !password) {
+            errorMessage.textContent = '请填写所有字段';
+            return;
+        }
+        // 验证密码一致
+        if (password !== confirmPassword) {
+            errorMessage.textContent = '两次输入的密码不一致';
+            return;
+        }
+
+        // 发送注册请求
+        fetch('http://localhost:5000/api/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, email, password })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('注册成功，正在跳转到登录页面');
+                window.location.href = 'index.html';
+            } else {
+                errorMessage.textContent = data.message || '注册失败';
+            }
+        })
+        .catch(error => {
+            console.error('Register error:', error);
+            errorMessage.textContent = '注册请求失败，请稍后再试';
+        });
+    });
+    </script>
+</body>
+</html>

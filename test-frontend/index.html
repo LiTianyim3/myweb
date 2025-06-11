@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>登录系统</title>
+  <link rel="stylesheet" href="static/css/style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="form-container">
+      <h1>用户登录</h1>
+      <div id="error-message" class="error-message"></div>
+      <form id="login-form" autocomplete="off">
+        <!-- 以下隐藏的假字段，用于阻断浏览器自动填充 -->
+        <input type="text" name="fakeusernameremembered" style="display:none">
+        <input type="password" name="fakepasswordremembered" style="display:none">
+
+        <div class="form-group">
+          <label for="username">用户名</label>
+          <input
+            type="text"
+            id="username"
+            name="username"
+            autocomplete="new-password"
+            required>
+        </div>
+        <div class="form-group">
+          <label for="password">密码</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            autocomplete="new-password"
+            required>
+        </div>
+        <div class="form-group">
+          <button type="submit" class="btn btn-primary">登录</button>
+        </div>
+      </form>
+      <div class="form-group text-center">
+        <p>
+          还没有账号? <a href="register.html">立即注册</a> |
+          <a href="reset_password.html">忘记密码？</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script src="static/js/main.js"></script>
+  <script>
+    document.getElementById('login-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const errorMessage = document.getElementById('error-message');
+      errorMessage.textContent = '';
+
+      fetch('http://localhost:5000/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+        credentials: 'include'
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          localStorage.setItem('user', JSON.stringify(data.user));
+          window.location.href = 'dashboard.html';
+        } else {
+          errorMessage.textContent = data.message;
+        }
+      })
+      .catch(() => {
+        errorMessage.textContent = '登录请求失败，请稍后再试';
+      });
+    });
+  </script>
+</body>
+</html>

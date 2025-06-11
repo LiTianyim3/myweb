@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户中心</title>
+    <link rel="stylesheet" href="static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="dashboard-container">
+            <header class="dashboard-header">
+                <h1>用户中心</h1>
+                <button id="logout-btn" class="btn btn-secondary">退出登录</button>
+            </header>
+            <div class="dashboard-content">
+                <div class="welcome-message">
+                    <h2>欢迎回来，<span id="username-display"></span>!</h2>
+                    <p>邮箱: <span id="email-display"></span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // 检查登录状态
+        function checkAuth() {
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (!user) {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            document.getElementById('username-display').textContent = user.username;
+            document.getElementById('email-display').textContent = user.email;
+            
+            // 验证后端会话是否有效
+            fetch('http://localhost:5000/api/me', {
+                method: 'GET',
+                credentials: 'include'
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('未登录或会话已过期');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (!data.success) {
+                    throw new Error('获取用户信息失败');
+                }
+                // 刷新本地用户信息
+                localStorage.setItem('user', JSON.stringify(data.user));
+                document.getElementById('username-display').textContent = data.user.username;
+                document.getElementById('email-display').textContent = data.user.email;
+            })
+            .catch(error => {
+                console.error('Auth Error:', error);
+                localStorage.removeItem('user');
+                window.location.href = 'index.html';
+            });
+        }
+        
+        // 退出登录
+        document.getElementById('logout-btn').addEventListener('click', function() {
+            fetch('http://localhost:5000/api/logout', {
+                method: 'POST',
+                credentials: 'include'
+            })
+            .then(response => response.json())
+            .then(data => {
+                localStorage.removeItem('user');
+                window.location.href = 'index.html';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                localStorage.removeItem('user');
+                window.location.href = 'index.html';
+            });
+        });
+        
+        // 页面加载时检查身份验证
+        window.addEventListener('load', checkAuth);
+    </script>
+</body>
+</html>
