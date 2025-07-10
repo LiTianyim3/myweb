@@ -29,11 +29,8 @@
                 window.location.href = 'index.html';
                 return;
             }
-            
             document.getElementById('username-display').textContent = user.username;
             document.getElementById('email-display').textContent = user.email;
-            
-            // 验证后端会话是否有效
             fetch('http://localhost:5000/api/me', {
                 method: 'GET',
                 credentials: 'include'
@@ -48,38 +45,26 @@
                 if (!data.success) {
                     throw new Error('获取用户信息失败');
                 }
-                // 刷新本地用户信息
                 localStorage.setItem('user', JSON.stringify(data.user));
                 document.getElementById('username-display').textContent = data.user.username;
                 document.getElementById('email-display').textContent = data.user.email;
             })
             .catch(error => {
-                console.error('Auth Error:', error);
                 localStorage.removeItem('user');
                 window.location.href = 'index.html';
             });
         }
-        
-        // 退出登录
-        document.getElementById('logout-btn').addEventListener('click', function() {
+        checkAuth();
+        document.getElementById('logout-btn').onclick = function() {
             fetch('http://localhost:5000/api/logout', {
                 method: 'POST',
                 credentials: 'include'
             })
-            .then(response => response.json())
-            .then(data => {
-                localStorage.removeItem('user');
-                window.location.href = 'index.html';
-            })
-            .catch(error => {
-                console.error('Error:', error);
+            .then(() => {
                 localStorage.removeItem('user');
                 window.location.href = 'index.html';
             });
-        });
-        
-        // 页面加载时检查身份验证
-        window.addEventListener('load', checkAuth);
+        };
     </script>
 </body>
 </html>

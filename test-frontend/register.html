@@ -37,7 +37,6 @@
             </form>
         </div>
     </div>
-
     <script>
     document.getElementById('register-form').addEventListener('submit', function(e) {
         e.preventDefault();  // 阻止表单默认提交
@@ -71,15 +70,14 @@
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('注册成功，正在跳转到登录页面');
+                alert('注册成功，请登录');
                 window.location.href = 'index.html';
             } else {
                 errorMessage.textContent = data.message || '注册失败';
             }
         })
-        .catch(error => {
-            console.error('Register error:', error);
-            errorMessage.textContent = '注册请求失败，请稍后再试';
+        .catch(() => {
+            errorMessage.textContent = '网络错误，请稍后重试';
         });
     });
     </script>
